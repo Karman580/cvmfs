@@ -600,7 +600,11 @@ int swissknife::CommandPull::Main(const swissknife::ArgumentList &args) {
     retries = String2Uint64(*args.find('a')->second);
   if (args.find('d') != args.end()) {
     pathfilter = catalog::RelaxedPathFilter::Create(*args.find('d')->second);
-    assert(pathfilter->IsValid());
+    if (!pathfilter->IsValid()) {
+      LogCvmfs(kLogCvmfs, kLogStderr, "Failed to parse dirtab from '%s'",
+               args.find('d')->second->c_str());
+      return 1;
+    }
   }
   if (args.find('E') != args.end()) {
     if (pathfilter != NULL) {

@@ -143,12 +143,16 @@ TEST_F(T_RelaxedPathFilter, NegativeRulesStayUnaffected) {
 TEST_F(T_RelaxedPathFilter, RelativeQueryPath) {
   // The sub-path walks in IsMatching()/IsOpposing() have the same npos
   // problem.  No in-tree caller passes a relative path today, but the walks
-  // must terminate for one.
-  EXPECT_TRUE(path_filter.Parse("/software\n"));
+  // must terminate for one, also when a negative rule matches part-way.
+  EXPECT_TRUE(path_filter.Parse("/software\n"
+                                "! foo\n"));
   ASSERT_TRUE(path_filter.IsValid());
 
   EXPECT_FALSE(path_filter.IsMatching("foo"));
   EXPECT_FALSE(path_filter.IsMatching("foo/bar"));
-  EXPECT_FALSE(path_filter.IsOpposing("foo"));
-  EXPECT_FALSE(path_filter.IsOpposing("foo/bar"));
+  EXPECT_FALSE(path_filter.IsMatching("bar"));
+  EXPECT_TRUE(path_filter.IsOpposing("foo"));
+  EXPECT_TRUE(path_filter.IsOpposing("foo/bar"));
+  EXPECT_FALSE(path_filter.IsOpposing("bar"));
+  EXPECT_FALSE(path_filter.IsOpposing("bar/baz"));
 }
